@@ -1,0 +1,26 @@
+{
+  "name": "shopee-bi-autopull",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "login": "node src/login.js",
+    "pull": "node src/index.js",
+    "pull:products": "node src/indexAllProducts.js",
+    "pull:product": "node src/indexProduct.js",
+    "login:lazada": "node src/lazada/login.js",
+    "pull:lazada": "node src/lazada/index.js",
+    "upload:sharepoint": "node src/uploadToSharePoint.js",
+    "pull:all": "node src/pullAll.js",
+    "daily": "node src/runDaily.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "playwright": "^1.61.1"
+  }
+}

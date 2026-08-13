@@ -1,0 +1,29 @@
+MizuMi
+coo@mizuhada.com
+Pass : Mizuhada@8888
+ 
+Bomi
+coo2@mizuhada.com
+Pass : Mizuhada@8888
+ 
+GC
+coo3@mizuhada.com
+Pass : Mizuhada@8888 
+
+flow 
+1. เข้าสู่ระบบด้วยรหัสข้างบน >> https://sellercenter.lazada.co.th/apps/seller/login 
+2.เข้ามาหน้า https://sellercenter.lazada.co.th/ba/dashboard 
+3.เลื่อนลงมาเเล้วกด " นำข้อมูลออก " 
+4.ต่อไปเช็ควันนี้เดือนอะไรถ้าเป็นเดือนนี้ให้ไปลิ้งรัเ path เปลี่ยนตามวัน เช่น 
+ https://sellercenter.lazada.co.th/ba/dashboard?dateRange=2026-07-01%7C2026-07-31&dateType=month 
+5.เเล้วกดเลื่อนลงมาเเล้วกด " นำข้อมูลออก "
+6.เข้า https://sellercenter.lazada.co.th/ba/product/performance เเล้วกด " นำข้อมูลออก "  
+7.เข้า https://sellercenter.lazada.co.th/ba/product/performance?dateType=month&dateRange=2026-06-01%7C2026-06-30  
+ โดยมันจะเป็น เดือน -1 โดยให้เข็คปัจจุบัน เเล้วเปลี่ยน path จากนั้นกด  " นำข้อมูลออก " 
+8.https://sellercenter.lazada.co.th/ba/promotion/campaign เเล้วกด นำข้อมูลออก 
+9.จะได้ทั้งหมด 5 ไฟล์
+10. กด logout โดย UI อยู่ใน /ui-tiktok กดออกเเล้ว เข้า user เรียงตามด้านบน 
+
+https://mizuhadagroup.sharepoint.com/sites/Shopeesellercenter/Shared%20Documents/Forms/AllItems.aspx 
+ต้องเข้า folder -> Data เเล้วจะเจอ folder Product / Shop -> Lazada / Shopee 
+

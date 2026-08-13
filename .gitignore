@@ -1,0 +1,7 @@
+node_modules/
+storage/
+downloads/
+.env
+debug-fail-*.png
+logs/
+.claude/settings.local.json
