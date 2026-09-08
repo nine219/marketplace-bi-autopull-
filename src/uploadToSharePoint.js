@@ -1,8 +1,9 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { uploadFile } = require('./sharepoint');
+const { uploadFile, getFolderWebUrl } = require('./sharepoint');
 const { todayDateFolder } = require('./dateFolder');
+const { sendTeamsAlert } = require('./teamsAlert');
 
 const DOWNLOADS_DIR = path.join(__dirname, '..', 'downloads');
 const REPORT_EXTENSIONS = new Set(['.xlsx', '.xls']);
@@ -58,26 +59,57 @@ async function main() {
 
   let uploaded = 0;
   let failed = 0;
+  // Tracks success/fail per platform so we can send one Teams alert each
+  // for Shopee and Lazada, rather than one alert for the whole upload run.
+  const platformStats = { Shopee: { uploaded: 0, failed: 0 }, Lazada: { uploaded: 0, failed: 0 } };
+
   for (const filePath of files) {
     const relativePath = path.relative(SCAN_DIR, filePath);
     const relativeDir = path.dirname(relativePath);
     const filename = path.basename(filePath);
-    const remoteFolder = mapToRemoteFolder(relativeDir === '.' ? '' : relativeDir, filename);
+    const cleanRelativeDir = relativeDir === '.' ? '' : relativeDir;
+    const remoteFolder = mapToRemoteFolder(cleanRelativeDir, filename);
+    const platform = cleanRelativeDir.split(path.sep)[0] === 'lazada' ? 'Lazada' : 'Shopee';
     try {
       const { webUrl } = await uploadFile(filePath, remoteFolder);
       console.log(`Uploaded: ${relativePath} -> ${webUrl}`);
       uploaded++;
+      platformStats[platform].uploaded++;
     } catch (err) {
       console.error(`Failed: ${relativePath}: ${err.message}`);
       failed++;
+      platformStats[platform].failed++;
     }
   }
 
   console.log(`Done. ${uploaded} uploaded, ${failed} failed.`);
+
+  let folderLink = '';
+  try {
+    folderLink = await getFolderWebUrl(`Data/${TARGET_DATE}`);
+  } catch (err) {
+    console.warn(`Could not look up SharePoint folder link: ${err.message}`);
+  }
+
+  for (const [platform, stats] of Object.entries(platformStats)) {
+    if (stats.uploaded === 0 && stats.failed === 0) continue; // nothing pulled for this platform
+    const status = stats.failed > 0 ? 'Error' : 'Success';
+    await sendTeamsAlert({
+      date: TARGET_DATE,
+      platform,
+      status,
+      link: status === 'Success' ? folderLink : '',
+    });
+  }
+
   if (failed > 0) process.exit(1);
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error(err.message);
+  // Upload crashed before per-file/per-platform tracking could run — let
+  // both platforms know rather than silently failing.
+  await sendTeamsAlert({ date: TARGET_DATE, platform: 'Shopee', status: 'Error', link: '' });
+  await sendTeamsAlert({ date: TARGET_DATE, platform: 'Lazada', status: 'Error', link: '' });
   process.exit(1);
 });

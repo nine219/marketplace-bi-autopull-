@@ -12,6 +12,7 @@
     "pull:lazada": "node src/lazada/index.js",
     "upload:sharepoint": "node src/uploadToSharePoint.js",
     "pull:all": "node src/pullAll.js",
+    "pull:fill-gaps": "node src/checkAndFillGaps.js",
     "daily": "node src/runDaily.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

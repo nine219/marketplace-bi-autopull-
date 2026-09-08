@@ -89,4 +89,14 @@ async function uploadFile(localFilePath, remoteFolderPath) {
   return { webUrl: json.webUrl, remotePath };
 }
 
-module.exports = { getAccessToken, getDriveId, uploadFile, SITE_HOST, SITE_PATH };
+// Looks up the webUrl of an existing folder (e.g. "Data/2026-09-08") for
+// linking to it, rather than to any one file inside it.
+async function getFolderWebUrl(remoteFolderPath) {
+  const driveId = await getDriveId();
+  const cleanPath = remoteFolderPath.replace(/^\/+|\/+$/g, '');
+  const res = await graphFetch(`/drives/${driveId}/root:/${cleanPath}`);
+  const json = await res.json();
+  return json.webUrl;
+}
+
+module.exports = { getAccessToken, getDriveId, uploadFile, getFolderWebUrl, SITE_HOST, SITE_PATH };
