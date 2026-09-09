@@ -8,8 +8,10 @@
 //
 // Only re-pulls the specific shops/accounts that are missing expected
 // files, not everything — re-running a shop/account that already succeeded
-// wastes time and risks tripping Shopee/Lazada's export throttling. Always
-// finishes with an upload pass (Teams alerts happen there, per platform).
+// wastes time and risks tripping Shopee/Lazada's export throttling. Only
+// runs the upload pass (and its Teams alerts) when there was actually a gap
+// to fill — if everything's already complete, pull:all already alerted for
+// today, so re-uploading here would just duplicate that Teams message.
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
@@ -73,8 +75,10 @@ const missingShopStats = SHOPS.filter((s) => !shopStatsComplete(s));
 const missingProducts = SHOPS.filter((s) => !productsComplete(s));
 const missingLazada = LAZADA_ACCOUNT_KEYS.filter((a) => !lazadaComplete(a));
 
-if (!missingShopStats.length && !missingProducts.length && !missingLazada.length) {
-  console.log('Nothing missing — all expected files are already present.');
+const hadGaps = missingShopStats.length || missingProducts.length || missingLazada.length;
+
+if (!hadGaps) {
+  console.log('Nothing missing — all expected files are already present. Skipping re-upload.');
 } else {
   if (missingShopStats.length) {
     console.log(`Shopee shop stats missing for: ${missingShopStats.join(', ')}`);
@@ -102,9 +106,11 @@ if (!missingShopStats.length && !missingProducts.length && !missingLazada.length
   }
 }
 
-console.log('\n=== Upload to SharePoint ===');
-const uploadResult = spawnSync(process.execPath, [path.join(ROOT, 'src/uploadToSharePoint.js')], {
-  stdio: 'inherit',
-  cwd: ROOT,
-});
-process.exit(uploadResult.status || 0);
+if (hadGaps) {
+  console.log('\n=== Upload to SharePoint ===');
+  const uploadResult = spawnSync(process.execPath, [path.join(ROOT, 'src/uploadToSharePoint.js')], {
+    stdio: 'inherit',
+    cwd: ROOT,
+  });
+  process.exit(uploadResult.status || 0);
+}
