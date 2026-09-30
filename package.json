@@ -8,6 +8,7 @@
     "pull": "node src/index.js",
     "pull:products": "node src/indexAllProducts.js",
     "pull:product": "node src/indexProduct.js",
+    "pull:ads": "node src/indexAds.js",
     "login:lazada": "node src/lazada/login.js",
     "pull:lazada": "node src/lazada/index.js",
     "upload:sharepoint": "node src/uploadToSharePoint.js",

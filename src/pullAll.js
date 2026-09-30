@@ -18,6 +18,7 @@ const ROOT = path.join(__dirname, '..');
 const STEPS = [
   ['Shopee — shop stats', 'src/index.js', 'Shopee'],
   ['Shopee — all products', 'src/indexAllProducts.js', 'Shopee'],
+  ['Shopee — ads', 'src/indexAds.js', 'Shopee'],
   ['Lazada', 'src/lazada/index.js', 'Lazada'],
   ['Upload to SharePoint', 'src/uploadToSharePoint.js', null],
 ];

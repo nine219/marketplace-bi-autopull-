@@ -6,7 +6,7 @@ const { todayDateFolder } = require('./dateFolder');
 const { sendTeamsAlert } = require('./teamsAlert');
 
 const DOWNLOADS_DIR = path.join(__dirname, '..', 'downloads');
-const REPORT_EXTENSIONS = new Set(['.xlsx', '.xls']);
+const REPORT_EXTENSIONS = new Set(['.xlsx', '.xls', '.csv']);
 
 // Defaults to today, but can be overridden (e.g. UPLOAD_DATE=2026-08-05
 // npm run upload:sharepoint) to re-upload a specific past day's folder.
@@ -30,6 +30,7 @@ function findReportFiles(dir) {
 // Maps a path (relative to downloads/{TARGET_DATE}/) to its SharePoint
 // destination folder:
 //   Data/{date}/Shop/Shopee/{shop}/...       <- downloads/{date}/{shop}/shop.shopee.*.xlsx
+//   Data/{date}/Ads/Shopee/{shop}/...        <- downloads/{date}/{shop}/ads_*.shopee.*.csv
 //   Data/{date}/Product/Shopee/{shop}/...    <- downloads/{date}/product/{shop}/(...)
 //   Data/{date}/Shop/Lazada/{account}/...    <- downloads/{date}/lazada/{account}/dashboard.lazada.*.xls
 //   Data/{date}/Product/Lazada/{account}/... <- downloads/{date}/lazada/{account}/product.lazada.* AND
@@ -45,6 +46,9 @@ function mapToRemoteFolder(localRelDir, filename) {
   }
   if (parts[0] === 'product') {
     return ['Data', TARGET_DATE, 'Product', 'Shopee', ...parts.slice(1)].join('/');
+  }
+  if (filename.startsWith('ads_')) {
+    return ['Data', TARGET_DATE, 'Ads', 'Shopee', ...parts].join('/');
   }
   return ['Data', TARGET_DATE, 'Shop', 'Shopee', ...parts].join('/');
 }
