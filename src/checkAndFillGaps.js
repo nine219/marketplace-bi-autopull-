@@ -1,6 +1,6 @@
 // Standalone command (npm run pull:fill-gaps) for when a previous pull:all
 // run died partway through a step (e.g. one shop/account crashed the whole
-// loop in index.js / indexAllProducts.js / lazada/index.js — see their
+// loop in index.js / indexAllProducts.js / indexAds.js / lazada/index.js — see their
 // per-item catch blocks, which log then re-throw). Since those scripts
 // always write into downloads/{today}/ (no way to target a past date — see
 // dateFolder.js usage in exportReport.js / exportCommon.js), this only ever
@@ -47,6 +47,12 @@ function productsComplete(shop) {
   return countMatching(path.join(DOWNLOADS_DIR, 'product', shop), 'product.shopee.') >= 2;
 }
 
+// One "ads_overview.shopee.*.csv" + one "ads_search.shopee.*.csv" (yesterday only — see exportAds.js).
+function adsComplete(shop) {
+  const dir = path.join(DOWNLOADS_DIR, shop);
+  return countMatching(dir, 'ads_overview.shopee.') >= 1 && countMatching(dir, 'ads_search.shopee.') >= 1;
+}
+
 // dashboard (yesterday+month), product performance (yesterday+month), promotion (1).
 function lazadaComplete(accountKey) {
   const dir = path.join(DOWNLOADS_DIR, 'lazada', accountKey.toLowerCase());
@@ -73,9 +79,10 @@ console.log(`Checking downloads/${DATE}/ for missing files...`);
 
 const missingShopStats = SHOPS.filter((s) => !shopStatsComplete(s));
 const missingProducts = SHOPS.filter((s) => !productsComplete(s));
+const missingAds = SHOPS.filter((s) => !adsComplete(s));
 const missingLazada = LAZADA_ACCOUNT_KEYS.filter((a) => !lazadaComplete(a));
 
-const hadGaps = missingShopStats.length || missingProducts.length || missingLazada.length;
+const hadGaps = missingShopStats.length || missingProducts.length || missingAds.length || missingLazada.length;
 
 if (!hadGaps) {
   console.log('Nothing missing — all expected files are already present. Skipping re-upload.');
@@ -88,6 +95,10 @@ if (!hadGaps) {
     console.log(`Shopee all-products missing for: ${missingProducts.join(', ')}`);
     runScoped('Shopee — all products', 'src/indexAllProducts.js', { SHOP_NAMES: missingProducts.join(',') });
   }
+  if (missingAds.length) {
+    console.log(`Shopee ads missing for: ${missingAds.join(', ')}`);
+    runScoped('Shopee — ads', 'src/indexAds.js', { SHOP_NAMES: missingAds.join(',') });
+  }
   if (missingLazada.length) {
     console.log(`Lazada missing for: ${missingLazada.join(', ')}`);
     runScoped('Lazada', 'src/lazada/index.js', { LAZADA_ACCOUNTS: missingLazada.join(',') });
@@ -95,11 +106,13 @@ if (!hadGaps) {
 
   const stillMissingShopStats = SHOPS.filter((s) => !shopStatsComplete(s));
   const stillMissingProducts = SHOPS.filter((s) => !productsComplete(s));
+  const stillMissingAds = SHOPS.filter((s) => !adsComplete(s));
   const stillMissingLazada = LAZADA_ACCOUNT_KEYS.filter((a) => !lazadaComplete(a));
-  if (stillMissingShopStats.length || stillMissingProducts.length || stillMissingLazada.length) {
+  if (stillMissingShopStats.length || stillMissingProducts.length || stillMissingAds.length || stillMissingLazada.length) {
     console.warn('\nStill incomplete after retry:');
     if (stillMissingShopStats.length) console.warn(`  Shopee shop stats: ${stillMissingShopStats.join(', ')}`);
     if (stillMissingProducts.length) console.warn(`  Shopee all-products: ${stillMissingProducts.join(', ')}`);
+    if (stillMissingAds.length) console.warn(`  Shopee ads: ${stillMissingAds.join(', ')}`);
     if (stillMissingLazada.length) console.warn(`  Lazada: ${stillMissingLazada.join(', ')}`);
   } else {
     console.log('\nAll gaps filled.');
